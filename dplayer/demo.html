@@ -1,0 +1,49 @@
+<meta http-equiv='Content-Type' content='text/html; charset=UTF-8' /><style>
+.playing{box-sizing: border-box;border: 1px solid #00a1d6; color:#00a1d6;}
+.dplistul {z-index:99;float:left!important;width:auto!important;list-style:none!important;padding:0!important;margin:0!important;border:0!important;transition:1s!important;}
+.dplistul a {text-decoration: none;float:left!important;list-style:none!important;margin:5px!important;border-radius:10px!important;height:30px!important;line-height:30px!important;text-align:center!important;width:50px!important;background-color:#fff!important;color:pink!important;cursor: pointer!important;}
+.dplistul a:hover {background-color:pink!important;color:#fff!important;}
+.dplayer-danmaku-item{text-shadow: rgb(0, 0, 0) 1px 0px 1px, rgb(0, 0, 0) 0px 1px 1px, rgb(0, 0, 0) 0px -1px 1px, rgb(0, 0, 0) -1px 0px 1px!important;opacity: 1!important;font-weight: bold!important;}
+.wbf{}
+</style>
+<link href='https://cdnjs.loli.net/ajax/libs/dplayer/1.25.0/DPlayer.min.css' rel='stylesheet'>
+<div id='dplayer'></div><ul class='dplistul'>
+<a href='javascript:void(0);' onclick='switchDPlayer(0)' id='p0'>P01</a>
+<a href='javascript:void(0);' onclick='switchDPlayer(1)' id='p1'>P02</a>
+<a href='javascript:void(0);' onclick='switchDPlayer(2)' id='p2'>P03</a>
+</ul>
+<script src='https://cdnjs.loli.net/ajax/libs/dplayer/1.25.0/DPlayer.min.js'></script>
+<script src='https://api.menhood.wang/getcip/getcipv2.php'></script>
+<script src='https://cdnjs.loli.net/ajax/libs/hls.js/0.9.1/hls.min.js'></script>
+<script src='https://cdnjs.loli.net/ajax/libs/flv.js/1.4.2/flv.min.js'></script>
+<script src='https://cdnjs.loli.net/ajax/libs/dashjs/2.9.2/dash.all.min.js'></script>
+<script src='https://cdnjs.loli.net/ajax/libs/blueimp-md5/2.10.0/js/md5.min.js'></script>
+<script>
+var listarr=['https://ddns.menhood.wang:2233/video/01.mp4','https://ddns.menhood.wang:2233/video/02.mp4','https://ddns.menhood.wang:2233/video/03.mp4'];
+var additionsarr=['https://ddns.menhood.wang:2233/api/xml2json/json/01.json','https://ddns.menhood.wang:2233/api/xml2json/json/02.json','https://ddns.menhood.wang:2233/api/xml2json/json/03.json'];
+var url=listarr[0];
+var pic='https://ddns.menhood.wang:2233/video/01_pic.jpg';
+var additions=additionsarr[0];
+var api='https://dans.mdh.red/';
+const dp = new DPlayer({
+container: document.getElementById('dplayer'),
+video: {url: url},
+danmaku: {id: md5(url),
+api: api,
+addition:['https://ddns.menhood.wang:2233/api/xml2json/json/01.json'],user: cip
+}});
+function switchDPlayer(pn){
+dp.switchVideo({
+url: listarr[pn],
+pic: pic
+}, {
+id: md5(listarr[pn]),
+api: api,
+addition:[additionsarr[pn]],user: cip
+});
+dp.toggle();
+for(var i=0;i<listarr.length;i++){
+document.getElementById('p'+i).className='wbf';
+};
+document.getElementById('p'+pn).className='playing';}
+</script>
