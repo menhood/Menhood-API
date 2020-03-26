@@ -1,4 +1,4 @@
-
+input,button,select,textarea{outline:none;}
 	* {cursor: pointer;}
 	.weui_mask_transition {
 		display: none;
@@ -305,7 +305,8 @@ header {
     padding: 10px 5px 0 0;
     display: block;
     max-height: 130px;
-    max-width: 130px
+    max-width: 130px;
+    float: left;
 }
 
 #share a,.btn {

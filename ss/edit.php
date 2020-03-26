@@ -81,7 +81,7 @@
                 $data = mysqli_fetch_array($req);
             ?>
             <script>
-                <?php echo 'document.title = "编辑"+"【新建】";var action="new",cid=" '.($data["max(cid)"]+1).'";';
+                <?php echo 'document.title = "编辑"+"【新建】";var action="new",cid="'.($data["max(cid)"]+1).'";';
                 ?> console.log("新建");
             </script>
             <div class="weui-cells__title">
@@ -224,11 +224,10 @@
         </p>
     </footer>
 
-    <!-- 引入JQ WEUI -->
+    <!-- 引入-->
     <script src="https://cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
     <script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/jquery-weui.min.js"></script>
     <script src="https://cdn.bootcss.com/mui/3.7.1/js/mui.min.js"></script>
-    <!-- 如果使用了某些拓展插件还需要额外的JS -->
     <script src="https://cdn.bootcss.com/jquery-weui/1.2.1/js/swiper.min.js"></script>
     <script>
         var postdata = {
@@ -274,12 +273,20 @@
         //上传图片
         function upload() {
             var form = new FormData(document.getElementById("upload_form"));
+            <?php if($settings['upload_api'] == ""):?>
             var imgs_len = postdata.img.length;
             form.append("cid",cid);
             form.append("index",imgs_len);
+            <?php endif;?>
             console.log(form);
             $.ajax({
-                url: "upload.php",
+                url: "<?php 
+                        if($settings['upload_api'] == ""){
+                            echo "upload.php";
+                        }else{
+                            echo $settings['upload_api'];
+                        }
+                    ?>",
                 type: "post",
                 data: form,
                 processData: false,
@@ -292,21 +299,23 @@
                     $.toast(result.msg, "text");
                     console.log("上传成功提示");
                     console.log(result);
-                    postdata.img.push(result.img);
+                    postdata.img.push(result.url);
                 },
                 error: function(result){
                     $.toast(result.msg, "text");
                     console.log("上传失败提示");
-                    console.log(result.msg);
+                    console.log(result.url);
                 }
             })
         }
         
         function del_upload(index) {
             var form = new FormData(document.getElementById("upload_form"));
+            
             form.append("action","del");
             form.append("cid",cid);
             form.append("index",index);
+            
             console.log(form);
             $.ajax({
                 url: "upload.php",
@@ -322,13 +331,12 @@
                     $.toast(result.msg, "text");
                     console.log("上传成功提示");
                     console.log(result);
-                    postdata.img.push(result.img);
                 },
                 error: function(result){
                     $.hideLoading();
                     $.toast(result.msg, "text");
                     console.log("上传失败提示");
-                    console.log(result.msg);
+                    console.log(result.url);
                 }
             })
         }
@@ -381,7 +389,9 @@
             $(".weui-gallery__del").click(function() {
                 $uploaderFiles.find("li").eq(index).remove();
                 postdata.img.splice(index,1);
+                <?php if($settings['upload_api'] == ""):?>
                 del_upload(index);
+                <?php endif;?>
                 console.log("删除了");
                 console.log(index);
             });

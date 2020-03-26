@@ -17,7 +17,7 @@ $data_array = [];
 <script src="https://blog.menhood.wang/usr/themes/Bilispace/static/jquery.fancybox.min.js"></script>
 <header>
 <!--<img id="bg" src="bg.jpg">-->
-<video muted loop autoplay id="bg" src="bg.mp4" ></video>
+<video muted loop autoplay id="bg" src="<?php echo $config['admin']['bg_url'];?>" ></video>
 <p id="user-name" class="data-name"><?php echo $config['admin']['name'];?></p>
 <img id="avt" class="data-avt" src="<?php echo "https://dn-qiniu-avatar.qbox.me/avatar/".md5($config['admin']['mail']);?>">
 </header>
@@ -45,7 +45,7 @@ while ($data = mysqli_fetch_assoc($req)):
                                 $img_urls = json_decode($data['img']);
                                     for ($i = 0;$i < count($img_urls); $i++):
                             ?>
-                                        <img class="list-img" style="height: 80px;" src="<?php echo "../".$img_urls[$i] ?>">
+                                        <img class="list-img" style="height: 80px;" src="<?php echo $img_urls[$i] ?>">
                             <?php   endfor;
                             endif;
                             ?> 
@@ -54,27 +54,6 @@ while ($data = mysqli_fetch_assoc($req)):
 					<p class="time"><?php echo date("Y-m-d H:m:s",$data['created']);?></p><!--<img class="c-icon" src="c.png">-->
 				</div>
 				<div class="r"></div>
-				<div class="cmt-wrap">
-					<!--<div class="like"><img src="l.png">甲，乙，丙，丁...</div>-->
-					<!--<div class="cmt-list">-->
-					<!--	<p><span>wu勋-EXO：</span>나는 서명～</p>-->
-					<!--	<p><span>鹿晗：</span>我们在国内冻成狗，我也想跟哥您去热热～</p>-->
-					<!--	<p><span>权龙：</span>나는 서명～</p>-->
-					<!--	<p><span>王聪：</span>去哪玩啊？那么爽</p>-->
-					<!--	<p>-->
-					<!--		<span class="data-name"><?php echo $pyq_config[$user_id]['user'];?></span>-->
-					<!--		回复-->
-					<!--				<span>-->
-					<!--					王聪-->
-					<!--				</span>-->
-					<!--				<span>-->
-					<!--					：-->
-					<!--				</span>-->
-					<!--		。-->
-					<!--	</p>-->
-					<!--	<p><span>杨：</span>😘私人飞机出行，求带上我～</p>-->
-					<!--</div>-->
-				</div>
 			</div>
 		</li>
 
@@ -83,6 +62,9 @@ while ($data = mysqli_fetch_assoc($req)):
 
 ?>
 </ul>
+<p style="text-align:center;">
+    到底了 
+</p>
 </div></div>
 <pre>
     <?php mysqli_close($conn);?>
@@ -91,6 +73,7 @@ while ($data = mysqli_fetch_assoc($req)):
 var img_array = $(".list-img");
 $(function(){
     loadfancybox();
+    $(".post p img").width("80");
 })
 function loadfancybox(){
 for (i = 0; i < img_array.length; i++) {
