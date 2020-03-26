@@ -19,7 +19,7 @@ function isPost() {
 
 if ($_GET['action'] == 'logout') {
             session_start();
-            unset($_SESSION['userid']);
+            unset($_SESSION['authorId']);
             unset($_SESSION['username']);
             echo '{"code":0,"msg":"注销成功"}';
             exit();
@@ -27,7 +27,7 @@ if ($_GET['action'] == 'logout') {
 
 if ($_GET['action'] == 'stat') {
             session_start();
-            if (isset($_SESSION['userid'])){
+            if (isset($_SESSION['authorId'])){
                 echo '{code:0,msg:"已登录"}';
             }else{
                 echo '{code:0,msg:"未登录"}';
@@ -51,13 +51,12 @@ if (isPost()) {
     include('conn.php');
     $username = htmlspecialchars($_POST['username']);
     $password = MD5($_POST['password']);
-    $userid = array_search($username, $config);
 
-    if (md5($config[$username]) === $password) {
+    if (md5($config[$username]['password']) === $password) {
         //登录成功
         session_start();
-        $_SESSION['username'] = $username;
-        $_SESSION['userid'] = $userid;
+        $_SESSION['username'] = $config[$username]['name'];
+        $_SESSION['authorId'] = $config[$username]['authorId'];
         echo '{"code":0,"msg":"登录成功！\n 欢迎 '.$_SESSION['username'].'"}';
     } else {
         echo '{"code":1,"msg":"密码错误！"}';

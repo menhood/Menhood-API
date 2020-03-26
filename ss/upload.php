@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION['userid'])) {
+if (!isset($_SESSION['authorId'])) {
     header('location:index.php');
     exit('未登录！将跳转首页登录');
 }
@@ -16,9 +16,18 @@ if (!isset($_SESSION['userid'])) {
 // move_uploaded_file($tmp_name,$uploadfile);
 
 header('Content-type: application/json');
-// echo '{"code":0,"msg":"上传成功"}';
 $a = explode(".",$_FILES['file']['name']);
-$name = date('Ymdhis').md5($_FILES["file"]["name"]).".".$a[1];
+if($_POST['action'] =='del'){
+    $file = 'imgs/'.$_POST['cid'].'_'.$_POST['index'].".".$a[1];
+    if(unlink($file)){
+        echo '{"code":0,"msg":"删除成功！"}';exit();
+    }else{
+        echo '{"code":1,"msg":"删除失败！"}';exit();
+    }
+}
+// echo '{"code":0,"msg":"上传成功"}';
+// $name = date('Ymdhis').md5($_FILES["file"]["name"]).".".$a[1];
+$name = $_POST['cid'].'_'.$_POST['index'].".".$a[1];
 // var_dump($_FILES[]);
 if ($_FILES["file"]["error"] > 0) {
     echo '{"code":1,"msg":"'.$_FILES["file"]["error"].'"';

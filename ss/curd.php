@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (!isset($_SESSION['userid'])){header('location:index.php');exit('未登录！将跳转首页登录');}
+if (!isset($_SESSION['authorId'])){header('location:index.php');exit('未登录！将跳转首页登录');}
 date_default_timezone_set("PRC");
 include('conn.php');
 $sql_cmd_c = "CREATE TABLE IF NOT EXISTS `typecho_ss` (
@@ -50,7 +50,7 @@ $POST = json_decode($command,TRUE);
 
 //新增记录
 if($POST['action'] == 'new'){
-    $sql_cmd_new = "INSERT INTO typecho_ss (title,text,img,authorId,created,modified,status) VALUES ('".$POST['title']."','".$POST['text']."','".$POST['img']."','".$POST['authorId']."',".strtotime(date("H:i:s",time())).",".strtotime(date("H:i:s",time())).",status='".$POST['status']."')";
+    $sql_cmd_new = "INSERT INTO typecho_ss (title,text,img,authorId,created,modified,status) VALUES ('".$POST['title']."','".$POST['text']."','".json_encode($POST['img'])."','".$POST['authorId']."',".strtotime(date("H:i:s",time())).",".strtotime(date("H:i:s",time())).",status='".$POST['status']."')";
     $req = mysqli_query($conn,$sql_cmd_new);
     
     if(!$req){

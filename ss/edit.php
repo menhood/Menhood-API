@@ -67,7 +67,7 @@
     <main>
 
         <?php session_start();
-        if (!isset($_SESSION['userid'])) {
+        if (!isset($_SESSION['authorId'])) {
             header('location:index.php');
             exit('未登录！将跳转首页登录');
         }
@@ -75,9 +75,13 @@
 
         <div class="demos-content-padded">
             <?php if ($_GET['action'] == "new"):
+                include('conn.php');
+                $sql_cmd_new = "select max(cid) from typecho_ss";
+                $req = mysqli_query($conn,$sql_cmd_new);
+                $data = mysqli_fetch_array($req);
             ?>
             <script>
-                <?php echo 'document.title = "编辑"+"【新建】";var action="new",cid="";';
+                <?php echo 'document.title = "编辑"+"【新建】";var action="new",cid=" '.($data["max(cid)"]+1).'";';
                 ?> console.log("新建");
             </script>
             <div class="weui-cells__title">
@@ -86,8 +90,7 @@
             <div class="weui-cells weui-cells_form">
                 <div class="weui-cell">
                     <div class="weui-cell__bd">
-                        <textarea onKeyUp="cal_words()" class="weui-textarea" placeholder="请输入文本" rows="3" id="text"><?php echo $data['text'];
-                            ?></textarea>
+                        <textarea onKeyUp="cal_words()" class="weui-textarea" placeholder="请输入文本" rows="3" id="text"></textarea>
                         <div class="weui-textarea-counter">
                             <span id="cal_words"></span>
                         </div>
@@ -217,7 +220,7 @@
         <p class="weui-footer__text">
             Copyright ©
             <?php echo date('Y');
-            ?> ss-Menhood
+            ?> <?php echo $_SESSION['username'];?>
         </p>
     </footer>
 
@@ -237,7 +240,7 @@
             "authorId": "",
             "status": ""
         };
-
+        
         //字数统计
         function cal_words() {
             var length = document.getElementById("text").value.length;
@@ -271,6 +274,9 @@
         //上传图片
         function upload() {
             var form = new FormData(document.getElementById("upload_form"));
+            var imgs_len = postdata.img.length;
+            form.append("cid",cid);
+            form.append("index",imgs_len);
             console.log(form);
             $.ajax({
                 url: "upload.php",
@@ -278,13 +284,48 @@
                 data: form,
                 processData: false,
                 contentType: false,
+                beforeSend:function(){
+                    $.showLoading();
+                },
                 success: function(result) {
+                    $.hideLoading();
                     $.toast(result.msg, "text");
                     console.log("上传成功提示");
                     console.log(result);
                     postdata.img.push(result.img);
                 },
                 error: function(result){
+                    $.toast(result.msg, "text");
+                    console.log("上传失败提示");
+                    console.log(result.msg);
+                }
+            })
+        }
+        
+        function del_upload(index) {
+            var form = new FormData(document.getElementById("upload_form"));
+            form.append("action","del");
+            form.append("cid",cid);
+            form.append("index",index);
+            console.log(form);
+            $.ajax({
+                url: "upload.php",
+                type: "post",
+                data: form,
+                processData: false,
+                contentType: false,
+                beforeSend:function(){
+                    $.showLoading();
+                },
+                success: function(result) {
+                    $.hideLoading();
+                    $.toast(result.msg, "text");
+                    console.log("上传成功提示");
+                    console.log(result);
+                    postdata.img.push(result.img);
+                },
+                error: function(result){
+                    $.hideLoading();
                     $.toast(result.msg, "text");
                     console.log("上传失败提示");
                     console.log(result.msg);
@@ -299,12 +340,17 @@
             $uploaderInput = $("#uploaderInput"),
             $uploaderFiles = $("#uploaderFiles");
                 
-            <?php if($_GET['action']=='edit' && !empty($data['img'])):?>
+            <?php if($_GET['action']=='edit' && !empty($data['img']) && $data['img']!=="[]" && $data['img']!==null):
+                echo "//".$data['img'];
+            ?>
                 //获取数据库已保存的图片信息
+                
                 postdata.img = <?php echo $data['img'];?>;
+                if(postdata.img==null){postdata.img=[];};
                 for(var n=0;n<postdata.img.length;n++){
                     $uploaderFiles.append($(tmpl.replace('#url#',postdata.img[n])));
                 }
+                
             <?php endif;?>
                 
             $uploaderInput.on("change", function(e) {
@@ -335,6 +381,9 @@
             $(".weui-gallery__del").click(function() {
                 $uploaderFiles.find("li").eq(index).remove();
                 postdata.img.splice(index,1);
+                del_upload(index);
+                console.log("删除了");
+                console.log(index);
             });
         });
 
@@ -347,7 +396,7 @@
             postdata.cid = cid;
             postdata.title = cutString($("#text").val(), 20);
             postdata.text = $("#text").val();
-            postdata.authorId = "1";
+            postdata.authorId = "<?php echo $_SESSION['authorId']?>";
             postdata.status=$("#status option:selected").val();
             //发送数据
             $.ajax({
@@ -356,9 +405,13 @@
                 data: JSON.stringify(postdata),
                 contentType: "application/json",
                 dataType: "json",
+                beforeSend:function(){
+                    $.showLoading();
+                },
                 success: function (result) {
                     console.log("edit ajax success!");
                     console.log(result);
+                    $.hideLoading();
                     $.toast(result.msg, "text");
                     if (result.code == 0) {
                         $(location).attr("href", "post.php");

@@ -1,7 +1,7 @@
 <?php
 session_start();
 include('conn.php');
-if (isset($_SESSION['userid']) && $_SERVER['REQUEST_METHOD'] == 'GET'):
+if (isset($_SESSION['authorId']) && $_SERVER['REQUEST_METHOD'] == 'GET'):
 
 // 获取select结果集的行数 判断是否跳转
 $install = mysqli_query($conn,"select * from `typecho_ss` where `cid`=2;");
@@ -24,16 +24,16 @@ $_GET['pagesize']?$pageSize = $_GET['pagesize']:$pageSize = 5;
 $page = ($page_now_num-1)*$pageSize;
 
 //默认每页说说数量
-$res = mysqli_query($conn,"SELECT * FROM typecho_ss WHERE status='publish' or status is null ");
+$res = mysqli_query($conn,"SELECT * FROM typecho_ss WHERE (status='publish' or status is null ) and authorId='".$_SESSION['authorId']."'");
 $num = mysqli_num_rows($res);
 $page_sum = ceil($num/$pageSize);
 
 if ($_GET['recycle'] == 'true') {
     $recycle = "true";
-    $sql_cmd_read_post = "select * from typecho_ss WHERE status='hidden';";
+    $sql_cmd_read_post = "select * from typecho_ss WHERE status='hidden' and authorId='".$_SESSION['authorId']."' order by cid desc;";
 } else {
     $recycle = "";
-    $sql_cmd_read_post = "SELECT * FROM typecho_ss WHERE status='publish' or status is null limit $page,$pageSize";
+    $sql_cmd_read_post = "SELECT * FROM typecho_ss WHERE (status='publish' or status is null) and authorId='".$_SESSION['authorId']."' order by cid desc limit $page,$pageSize";
 }
 //去数据库取数据
 $res = mysqli_query($conn,$sql_cmd_read_post);
@@ -150,11 +150,11 @@ $nextpage = ($page_now_num + 1) > $num ? '?page='.$num : '?page='.($page_now_num
                     <p class="weui-media-box__desc">
                         <?php echo $row['text'];
                         ?>
-                        <?php if (!empty($row['img'])):
+                        <?php if (!empty($row['img']) && $data['img']!=="[]" && $data['img']!==null):
                         $img_urls = json_decode($row['img']);
                         for ($i = 0;$i < count($img_urls); $i++):
                         ?>
-                        <img class="weui-media-box__thumb" src="<?php echo $img_urls[$i] ?>">
+                        <img class="weui-media-box__thumb" style="max-width:100%;margin: 5px;" src="<?php echo $img_urls[$i] ?>">
                         <?php endfor;
                         endif;
                         ?>
@@ -178,7 +178,7 @@ $nextpage = ($page_now_num + 1) > $num ? '?page='.$num : '?page='.($page_now_num
                     <a href="<?php echo $prevpage.'"';
                         if ($page_now_num == 1) { echo  ' style="display:none;" ';
                         }
-                        ?>  class="weui-btn weui-btn_mini weui-btn_primary" id="Prevpage">上一页</a>
+                        ?>  class="weui-btn weui-btn_mini weui-btn_primary" id="Prevpage">上页</a>
                         </div>
                         <div class="weui-flex__item">
                         <input id="page_num" class="weui-input" type="number" pattern="[0-9]*" placeholder="<?php echo $page_now_num."/".$page_sum;
@@ -191,7 +191,7 @@ $nextpage = ($page_now_num + 1) > $num ? '?page='.$num : '?page='.($page_now_num
                         <a href="<?php echo $nextpage.'"';
                         if ($page_now_num == $page_sum) { echo  ' style="display:none;" ';
                         }
-                        ?> class="weui-btn weui-btn_mini weui-btn_primary" id="Nextpage">下一页</a>
+                        ?> class="weui-btn weui-btn_mini weui-btn_primary" id="Nextpage">下页</a>
                 </div>
             </div>
         </div>
@@ -204,7 +204,7 @@ $nextpage = ($page_now_num + 1) > $num ? '?page='.$num : '?page='.($page_now_num
         <p class="weui-footer__text">
             Copyright ©
             <?php echo date('Y');
-            ?> ss-Menhood
+            ?> <?php echo $_SESSION['username'];?>
         </p>
     </footer>
 
@@ -245,12 +245,15 @@ $nextpage = ($page_now_num + 1) > $num ? '?page='.$num : '?page='.($page_now_num
                                         "action": "logout"
                                     },
                                     dataType: "json",
+                                    beforeSend:function(){
+                                        $.showLoading();
+                                    },
                                     success: function (result) {
                                         console.log("success!");
                                         console.log(result);
                                         $.toast(result.msg, "text");
                                         if (result.code == 0) {
-                                            $.showLoading();
+                                            $.hideLoading();
                                             $(location).attr("href", "index.php");
                                             //   $("main").html(result.data);
                                             // $(location).attr("href","post.php");
@@ -294,6 +297,10 @@ $nextpage = ($page_now_num + 1) > $num ? '?page='.$num : '?page='.($page_now_num
                 confirm_action = "del";
                 resume = '';
             }
+            var confirm_data={
+                "action": confirm_action,
+                "cid": cid
+                };
             $.actions({
                 title: "操作",
                 onClose: function() {
@@ -318,19 +325,19 @@ $nextpage = ($page_now_num + 1) > $num ? '?page='.$num : '?page='.($page_now_num
                                 $.ajax({
                                     url: "curd.php",
                                     type: "post",
-                                    data: {
-                                        "action": confirm_action,
-                                        "cid": cid
-                                    },
+                                    data: JSON.stringify(confirm_data),
                                     contentType: "application/json",
                                     dataType: "json",
+                                    beforeSend:function(){
+                                        $.showLoading();
+                                    },
                                     success: function (result) {
                                         console.log("删除ajax success!");
                                         console.log(result);
+                                        $.hideLoading();
                                         $.toast(result.msg, "text");
                                         if (result.code == 0) {
                                             //$("#cid_"+cid).remove();
-                                            // $.showLoading();
                                             location.reload();
                                             //   $("main").html(result.data);
                                             // $(location).attr("href","post.php");

@@ -68,7 +68,7 @@
         <?php
         session_start();
         // 检测是否登录
-        if (!isset($_SESSION['userid'])) :
+        if (!isset($_SESSION['authorId'])) :
         ?>
 
         <script>
