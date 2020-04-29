@@ -43,7 +43,7 @@ curl_close($ch);
             $type = 1;
         }
         $time = floatval($pieces[0])+$addtime+$minustime;
-        $data .= '['.$time.','. $type.','. $pieces[3].',"'. $pieces[6] .'","'.  str_ireplace(["/","\r\n", "\r", "\n","\""],['|',"","",""," "],$d[1][$i]).'"],';
+        $data .= '['.$time.','. $type.','. $pieces[3].',"'. $pieces[6] .'","'.  str_ireplace(["/","\r\n", "\r", "\n","\"","\\"],['|',"","",""," ",""],$d[1][$i]).'"],';
     }
     $newstr = substr($data,0,strlen($data)-1);
     $fstr = '{"code":0,"data":['.$newstr.']}';
