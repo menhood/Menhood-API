@@ -1,11 +1,11 @@
 <?php
-header("Access-Control-Allow-Origin: *");
+header('Access-Control-Allow-Origin: *');
 header("content-type:application/json ;charset=utf-8");
-header("Access-Control-Allow-Headers:x-requested-with,content-type");
-header("Access-Control-Allow-Method: PUT, POST, GET, DELETE, OPTIONS");
-if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    exit();
-}
+// header("Access-Control-Allow-Headers:x-requested-with,content-type");
+header('Access-Control-Allow-Method: *');
+// if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+//     exit();
+// }
 $addtime = 0;
 $minustime = 0;
 if ($_GET['cid']) {
@@ -43,7 +43,7 @@ curl_close($ch);
             $type = 1;
         }
         $time = floatval($pieces[0])+$addtime+$minustime;
-        $data .= '['.$time.','. $type.','. $pieces[3].',"'. $pieces[6].'","'. $d[1][$i].'"],';
+        $data .= '['.$time.','. $type.','. $pieces[3].',"'. $pieces[6] .'","'.  str_ireplace(["/","\r\n", "\r", "\n"],['|',"","",""],$d[1][$i]).'"],';
     }
     $newstr = substr($data,0,strlen($data)-1);
     $fstr = '{"code":0,"data":['.$newstr.']}';
